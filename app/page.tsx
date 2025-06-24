@@ -1,18 +1,34 @@
 'use client';
 
 import { useState } from 'react';
-import { generateVideoWithKling } from '../utils/kling';
 
 export default function Page() {
   const [description, setDescription] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleGenerate = async () => {
+    setLoading(true);
     try {
-      const url = await generateVideoWithKling(description);
-      setVideoUrl(url);
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: description }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Une erreur est survenue');
+      }
+
+      setVideoUrl(data.url);
     } catch (error: any) {
       alert("Erreur : " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -33,9 +49,10 @@ export default function Page() {
 
       <button
         onClick={handleGenerate}
-        className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+        className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+        disabled={loading}
       >
-        Generate Video
+        {loading ? 'Generating...' : 'Generate Video'}
       </button>
 
       {videoUrl && (
