@@ -1,29 +1,28 @@
-export async function generateVideoWithKling(prompt: string): Promise<string> {
-  const API_KEY = 'ee7411e9f4ca4f95a5a7e1082a417c7f7cde531e7924ec141cfaa536813228ab';
+const API_KEY = process.env.KLING_API_KEY; // Assure-toi que la variable est dans ton fichier .env
 
-  try {
-    const response = await fetch('https://api.kling.ai/v1/videos/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`,
-      },
-      body: JSON.stringify({
-        prompt: prompt,
-        aspect_ratio: '16:9',     // ou '9:16' si tu veux du format TikTok
-        duration: 5,              // durée de la vidéo (en secondes)
-        language: 'en',           // ou 'fr' si Kling le supporte
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Erreur API Kling: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.video_url || '';
-  } catch (error) {
-    console.error('Erreur lors de la génération de la vidéo :', error);
-    return '';
+export async function generateVideoWithKling(description: string): Promise<string> {
+  if (!API_KEY) {
+    throw new Error('Missing Kling API key');
   }
+
+  const response = await fetch('https://api.kling.ai/v1/generate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${API_KEY}`,
+    },
+    body: JSON.stringify({
+      prompt: description,
+      aspect_ratio: '16:9',
+      duration: 5, // en secondes
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Failed to generate video');
+  }
+
+  const data = await response.json();
+  return data.video_url; // ou ajuste selon la vraie structure retournée par l’API
 }
