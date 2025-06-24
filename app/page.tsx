@@ -1,12 +1,10 @@
-const handleGenerate = async () => {
-  const res = await fetch('/api/generate-video', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ prompt: description }),
-  });
+import { generateVideoWithKling } from '../utils/kling';
 
-  const data = await res.json();
-  setVideoUrl(data.url);
+const handleGenerate = async () => {
+  try {
+    const url = await generateVideoWithKling(description);
+    setVideoUrl(url);
+  } catch (error: any) {
+    alert("Erreur : " + error.message);
+  }
 };
