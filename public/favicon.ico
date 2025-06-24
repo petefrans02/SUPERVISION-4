@@ -1,1 +1,8 @@
 
+export const metadata = {
+  title: 'Supervision AI',
+  description: 'AI Video Generation Platform',
+  icons: {
+    icon: '/favicon.ico',
+  },
+}
